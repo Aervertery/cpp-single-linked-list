@@ -5,7 +5,6 @@
 #include <initializer_list>
 #include <vector>
 #include <cassert>
-// добавьте неоходимые include-директивы сюда
 
 template <typename Type>
 class SingleLinkedList {
@@ -208,9 +207,9 @@ public:
         // Сначала надо удостовериться, что текущий список пуст
         assert(this->IsEmpty() && head_.next_node == nullptr);
 
-        SingleLinkedList tmp(other.begin(), other.end());
-
         /* скопировать внутрь tmp элементы other */
+
+        SingleLinkedList tmp(other.begin(), other.end());
 
         // После того как элементы скопированы, обмениваем данные текущего списка и tmp
         swap(tmp);
@@ -300,37 +299,30 @@ private:
 
 template <typename Type>
 bool operator==(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
-    // Заглушка. Реализуйте сравнение самостоятельно
     return std::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
 
 template <typename Type>
 bool operator!=(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
-    // Заглушка. Реализуйте сравнение самостоятельно
     return !(lhs == rhs);
 }
 
 template <typename Type>
 bool operator<(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
-    // Заглушка. Реализуйте сравнение самостоятельно
     return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 }
 
 template <typename Type>
-bool operator<=(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
-    // Заглушка. Реализуйте сравнение самостоятельно
     return !(rhs < lhs);
 }
 
 template <typename Type>
 bool operator>(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
-    // Заглушка. Реализуйте сравнение самостоятельно
     return rhs < lhs;
 }
 
 template <typename Type>
 bool operator>=(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
-    // Заглушка. Реализуйте сравнение самостоятельно
     return !(lhs < rhs);
 }
 
