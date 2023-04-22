@@ -179,8 +179,7 @@ public:
     // Возвращает константный итератор, указывающий на позицию перед первым элементом односвязного списка.
     // Разыменовывать этот итератор нельзя - попытка разыменования приведёт к неопределённому поведению
     [[nodiscard]] ConstIterator cbefore_begin() const noexcept {
-        Node* headref = const_cast<Node*>(&head_);
-        return ConstIterator(headref);
+        return ConstIterator(const_cast<Node*>(&head_));
     }
 
     // Возвращает количество элементов в списке за время O(1)
