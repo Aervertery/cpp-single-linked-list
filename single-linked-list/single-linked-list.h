@@ -179,6 +179,7 @@ public:
     // Возвращает константный итератор, указывающий на позицию перед первым элементом односвязного списка.
     // Разыменовывать этот итератор нельзя - попытка разыменования приведёт к неопределённому поведению
     [[nodiscard]] ConstIterator cbefore_begin() const noexcept {
+        Node* headref = const_cast<Node*>(&head_);
         return ConstIterator(headref);
     }
 
@@ -193,8 +194,10 @@ public:
     SingleLinkedList(InputIteratorType first, InputIteratorType last) : head_(), size_(0) {
         assert(this->IsEmpty() && head_.next_node == nullptr);
         if (first != last) {
+            Iterator tail_it = before_begin();
             for (auto it = first; it != last; ++it) {
                 InsertAfter(tail_it, *it);
+                ++tail_it;
             }
 
         }
@@ -220,9 +223,6 @@ public:
     }
 
     void PushFront(const Type& value) {
-        /*head_.next_node = new Node(value, head_.next_node);
-        ++size_;
-        ++tail_it;*/
         InsertAfter(before_begin(), value);
     }
 
@@ -235,9 +235,6 @@ public:
         Node* new_ = new Node(value, pos.node_->next_node);
         pos.node_->next_node = new_;
         ++size_;
-        if (!(&tail_it) || !(pos.node_->next_node->next_node)) {
-            tail_it++;
-        }
         return Iterator(new_);
     }
 
@@ -250,9 +247,6 @@ public:
     Возвращает итератор на элемент, следующий за удалённым
     */
     Iterator EraseAfter(ConstIterator pos) noexcept {
-        if (!pos.node_->next_node->next_node) {
-            tail_it = Iterator(pos.node_);
-        } 
         delete std::exchange(pos.node_->next_node, pos.node_->next_node->next_node);
         --size_;
         return Iterator(pos.node_->next_node);
@@ -283,9 +277,7 @@ public:
 private:
     // Фиктивный узел, используется для вставки "перед первым элементом"
     Node head_;
-    Node* headref = &head_;
     size_t size_;
-    Iterator tail_it = before_begin();
 };
 
 template <typename Type>
