@@ -3,7 +3,6 @@
 #include <string>
 #include <utility>
 #include <initializer_list>
-#include <vector>
 #include <cassert>
 
 template <typename Type>
@@ -67,7 +66,7 @@ class SingleLinkedList {
         // Оператор проверки итераторов на неравенство
         // Противоположен !=
         [[nodiscard]] bool operator!=(const BasicIterator<const Type>& rhs) const noexcept {
-            return !(this->node_ == rhs.node_);
+            return !(*this == rhs);
         }
 
         // Оператор сравнения итераторов (в роли второго аргумента итератор)
@@ -79,7 +78,7 @@ class SingleLinkedList {
         // Оператор проверки итераторов на неравенство
         // Противоположен !=
         [[nodiscard]] bool operator!=(const BasicIterator<Type>& rhs) const noexcept {
-            return !(this->node_ == rhs.node_);
+            return !(*this == rhs);
         }
 
         // Оператор прединкремента. После его вызова итератор указывает на следующий элемент списка
@@ -192,28 +191,16 @@ public:
 
     template <typename InputIteratorType>
     SingleLinkedList(InputIteratorType first, InputIteratorType last) : head_(), size_(0) {
+        assert(this->IsEmpty() && head_.next_node == nullptr);
         if (first != last) {
-            std::vector<Type> tmp;
             for (auto it = first; it != last; ++it) {
-                tmp.push_back(*it);
+                InsertAfter(tail_it, *it);
             }
-            for (auto it = tmp.rbegin(); it != tmp.rend(); ++it) {
-                PushFront(*it);
-            }
+
         }
     }
 
-    SingleLinkedList(const SingleLinkedList& other) {
-        // Сначала надо удостовериться, что текущий список пуст
-        assert(this->IsEmpty() && head_.next_node == nullptr);
-
-        /* скопировать внутрь tmp элементы other */
-
-        SingleLinkedList tmp(other.begin(), other.end());
-
-        // После того как элементы скопированы, обмениваем данные текущего списка и tmp
-        swap(tmp);
-        // Теперь tmp пуст, а текущий список содержит копию элементов other
+    SingleLinkedList(const SingleLinkedList& other) : SingleLinkedList(other.begin(), other.end()) {
     }
 
     SingleLinkedList(std::initializer_list<Type> values) : SingleLinkedList(values.begin(), values.end())
@@ -233,8 +220,10 @@ public:
     }
 
     void PushFront(const Type& value) {
-        head_.next_node = new Node(value, head_.next_node);
+        /*head_.next_node = new Node(value, head_.next_node);
         ++size_;
+        ++tail_it;*/
+        InsertAfter(before_begin(), value);
     }
 
     /*
@@ -246,6 +235,9 @@ public:
         Node* new_ = new Node(value, pos.node_->next_node);
         pos.node_->next_node = new_;
         ++size_;
+        if (!(&tail_it) || !(pos.node_->next_node->next_node)) {
+            tail_it++;
+        }
         return Iterator(new_);
     }
 
@@ -258,20 +250,18 @@ public:
     Возвращает итератор на элемент, следующий за удалённым
     */
     Iterator EraseAfter(ConstIterator pos) noexcept {
-        Node* deleting = new Node(pos.node_->next_node->value, pos.node_->next_node->next_node);
-        deleting = deleting->next_node;
-        delete pos.node_->next_node;
-        pos.node_->next_node = deleting;
-        return Iterator(deleting);
+        if (!pos.node_->next_node->next_node) {
+            tail_it = Iterator(pos.node_);
+        } 
+        delete std::exchange(pos.node_->next_node, pos.node_->next_node->next_node);
+        --size_;
+        return Iterator(pos.node_->next_node);
     }
 
     void Clear() noexcept {
         while (head_.next_node) {
-            auto next = head_.next_node->next_node;
-            delete head_.next_node;
-            head_.next_node = next;
+            EraseAfter(before_begin());
         }
-        size_ = 0;
     }
 
     SingleLinkedList& operator=(const SingleLinkedList& rhs) {
@@ -295,10 +285,14 @@ private:
     Node head_;
     Node* headref = &head_;
     size_t size_;
+    Iterator tail_it = before_begin();
 };
 
 template <typename Type>
 bool operator==(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
+    if (lhs.GetSize() != rhs.GetSize()) {
+        return false;
+    }
     return std::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
 
