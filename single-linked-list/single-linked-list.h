@@ -194,9 +194,8 @@ public:
         assert(this->IsEmpty() && head_.next_node == nullptr);
         if (first != last) {
             Iterator tail_it = before_begin();
-            for (auto it = first; it != last; ++it) {
+            for (auto it = first; it != last; ++it, ++tail_it) {
                 InsertAfter(tail_it, *it);
-                ++tail_it;
             }
 
         }
